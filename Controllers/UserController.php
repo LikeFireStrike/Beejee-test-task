@@ -17,13 +17,14 @@ Class UserController extends Controller
                     $saltStr  = '(['.md5($password).']@{'.md5($login).'})';
                     $hash     = hash('sha256', $saltStr);
                     $response = [];
-                    if ($admin->pword == $hash) {
+                    if ($admin['pword'] == $hash) {
                         $roleHash = md5('role is '.md5($login));
                         $_SESSION['isAdmin'] = $roleHash;
                         $response['success'] = 1;
                     } else {
                         $response['success'] = 0;
                     }
+                    echo json_encode($response);
                 } else {
                     throw new Exception("Empty form parameters!");
                 }

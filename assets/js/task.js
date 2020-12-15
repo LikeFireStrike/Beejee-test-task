@@ -12,15 +12,17 @@ class Task {
     return $.get('?action=template')
   }
   static loadPage() {
-    $('#tasks-container').find('.wrap-task').remove()
-    $('.loader').show()
-    $.when(Task.loadTemplate()).done((template)=>{
-      console.log('Load template');
-      Task.template = template
-      $.when(Task.createNavBar()).done(()=>{
-        console.log('After navbar creation.');
-        Task.setPageParam(props.page)
-        Task.loadTasks()
+    $.when(authCheck()).done(()=>{
+      $('#tasks-container').find('.wrap-task').remove()
+      $('.loader').show()
+      $.when(Task.loadTemplate()).done((template)=>{
+        console.log('Load template');
+        Task.template = template
+        $.when(Task.createNavBar()).done(()=>{
+          console.log('After navbar creation.');
+          Task.setPageParam(props.page)
+          Task.loadTasks()
+        })
       })
     })
   }
@@ -83,22 +85,23 @@ class Task {
   }) {
     status = parseInt(status) ? 'task is done.' : 'task in progress.'
     moderated = parseInt(moderated) ? 'Moderated by Admin.' : 'not moderated.'
-    $.when(this.authCheck()).done((response) => {
-      let isAdmin = parseInt(response)
-      let edit = isAdmin ? '<a class="btn btn-info" href="">Edit task</a>' : ''
+  //  $.when(authCheck()).done((response) => {
+    //  let isAdmin = parseInt(response)
+      console.log(isAdmin)
+      let edit = isAdmin ? '<button class="btn btn-info">Edit task</button>' : ''
       let html = Task.template.replace('{name}', name).replace('{email}', email)
       .replace('{content}', content).replace('{status}', status)
       .replace('{id}', id).replace('{edit}', edit)
       let item = htmlToElem(html)
       console.log('Item ' + id + ' added!')
       document.getElementById('tasks-container').append(item)
-    }).done(() => {
+  //  }).done(() => {
       $('.loader').hide()
-    })
+  //  })
   }
-  authCheck() {
+  /*authCheck() {
       return $.get('?controller=user&action=secure')
-  }
+  }*/
 }
 
 export default Task;

@@ -4,13 +4,15 @@ import Task from './task.js'
   $('.filter-select').select2({
     minimumResultsForSearch: -1
   })
+  // Set sorting parameters and their default values
   const urlParams = new URLSearchParams(window.location.search)  
   window.props = {}
+  window.isAdmin = 0
   props.page = parseInt(urlParams.get('page'))
   props.column = 'id'
   props.direction = 'DESC'
     
-  window.htmlToElem = function(html) {
+  window.htmlToElem = (html)=>{
     let temp = document.createElement('template')
     html = html.trim() // Never return a space text node as a result
     temp.innerHTML = html
@@ -18,45 +20,95 @@ import Task from './task.js'
   }
     
   // Object to array conversion
-  window.objectToArray = function(obj) {
+  window.objectToArray = (obj)=>{
     return Object.entries(obj).map(([,v]) => v)
   }
-
-  Task.loadPage(props)
-    
+  
+  window.authCheck = ()=>{
+    return $.get('?controller=user&action=secure').done((response)=>{
+      isAdmin = parseInt(response)
+      if (isAdmin) {
+        $('.btn-show-login').hide()
+        $('.btn-logout').show()
+      } else {
+        $('.btn-show-login').show()
+        $('.btn-logout').hide()
+      }
+    })
+  }
+  // Load the tasks for current sorting parameters
+  Task.loadPage()
+  
+  // Listen for creating the task form submission
   $('#create-form').on('submit', function(e) {
     e.preventDefault()
     if (validateForm($(this))) {
         let data = $(this).serialize()
-        $.post('?action=create', data)
+        $.post('?action=create', data) // Send data to backend
         .done(function(response) {
           try {
             response = JSON.parse(response)
-            if (parseInt(response.success)) {
+            if (parseInt(response.success)) { // If OK
               $('#tasks-placeholder').hide()
               props.page = 1
-              Task.loadPage()
-              $('#messageModal').modal().find('.modal-body').find('span')
-              .addClass('text-success').text('The task was successfully created!')
-              $('#column-select').val('id').trigger('change.select2');
-              $('#order-select').val('DESC').trigger('change.select2');
+              Task.loadPage() // Show the tasks items
+              showMessageModal('The task was successfully created!', 'success') // Show success message
+              // Reset the form
+              $('#create-form').find('input, textarea').val('')
+              // Reset sorting filters
+              $('#column-select').val('id').trigger('change.select2')
+              $('#order-select').val('DESC').trigger('change.select2')
             } else {
-              $('#messageModal').modal().find('.modal-body').find('span')
-              .addClass('text-danger')
-              .html('An error was occured while creating the task. </br> Reload the page please.')
+              // Show an error message
+              showMessageModal('An error was occured while creating the task. </br> Reload the page please.', 'danger')
             }
           }catch(e) {
-            $('#messageModal').modal().find('.modal-body').find('span')
-            .addClass('text-danger').html('The server response is not a valid JSON. </br> Reload the page please.')
+            showMessageModal('The server response is not a valid JSON. </br> Reload the page please.', 'danger')
           }
         }).fail(()=>{
-          $('#messageModal').modal().find('.modal-body').find('span')
-          .addClass('text-danger')
-          .html('The server error was occured. </br> Reload the page please.')
+          showMessageModal('The server error was occured. </br> Reload the page please.', 'danger')
         })
     } 
   })
 
+  $('#login-form').on('submit', function(e) {
+    e.preventDefault()
+    console.log($(this).serialize())
+    if (validateForm($(this))) {
+      let data = $(this).serialize()
+      $.post($(this).attr('action'), data) // Send data to backend
+      .done(function(response) {
+        try {
+          response = JSON.parse(response)
+          let errorLabel = $('#admin-error')
+          if(response['success'] == 1) {
+            if (errorLabel.is(":visible")){errorLabel.hide()}
+            Task.loadPage()
+            $('#loginModal').modal('hide').find('input').val('')
+          } else {
+            if (!errorLabel.is(":visible")){$('#admin-error').show()}
+          }
+        } catch(e) {
+          $('#loginModal').modal('hide')
+          showMessageModal('The server error was occured. </br> Reload the page please.', 'danger')
+        }
+      })
+    }
+  })
+  
+  // Logout action
+  $('.btn-logout').on('click', (e)=>{
+    $.get('?controller=user&action=logout').done(()=>{
+      Task.loadPage()
+    })
+  })
+  // Show modal with success or error message
+  function showMessageModal(message, type) {
+    $('#messageModal').modal().find('.modal-body').find('span')
+    .addClass('text-' + type)
+    .html(message)
+  }
+  // Update the page on sorting change
   $('#column-select').on('change',(e)=>{
     props.column = e.target.value
     $('#tasks-placeholder').hide()
@@ -67,74 +119,59 @@ import Task from './task.js'
     $('#tasks-placeholder').hide()
     Task.loadPage()
   })
-  
+  // Clean the modal message after closing 
   $('#messageModal').on('hide.bs.modal', function (e) {
     let modal = $(this)
     modal.find('.modal-body').find('span').removeClass().html('')
   })
-    /*==================================================================
-    [ Validate after type ]*/
-    /*    
-    $('.validate-input .input').each(function(){
-        $(this).on('blur', function(){
-            if(validate(this) == false){
-                showValidate(this)
-            }
-            else {
-                $(this).parent().addClass('true-validate')
-            }
-        })    
-    })
-    */
-  
-    /*==================================================================
-    [ Validate ]*/
-    function validateForm(form) {
-      let input = form.find('.validate-input .input')
-      let check = true
-      for(var i=0; i<input.length; i++) {
-          if(validate(input[i]) == false){
-              showValidate(input[i])
-              check=false
-          }
+  /*==================================================================
+  [ Validate ]*/
+  function validateForm(form) {
+    let input = form.find('.validate-input .input')
+    let check = true
+    for(var i=0; i<input.length; i++) {
+      if(validate(input[i]) == false){
+        showValidate(input[i])
+        check=false
       }
-      return check
     }
-    
-    $('.validate-form .input').each(function(){
-        $(this).focus(function(){
-           hideValidate(this)
-           $(this).parent().removeClass('true-validate')
-        })
+    return check
+  }
+  
+  $('.validate-form .input').each(function(){
+    $(this).focus(function(){
+      hideValidate(this)
+      $(this).parent().removeClass('true-validate')
     })
-
-     function validate (input) {
-        if($(input).attr('type') == 'email' || $(input).attr('name') == 'email') {
-            if($(input).val().trim().match(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
-                return false
-            }
-        }
-        else {
-            if($(input).val().trim() == ''){
-                return false
-            }
-        }
+  })
+  
+  function validate (input) {
+    if($(input).attr('type') == 'email' || $(input).attr('name') == 'email') {
+      if($(input).val().trim().match(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
+        return false
+      }
     }
-
-    function showValidate(input) {
-        var thisAlert = $(input).parent()
-        $(thisAlert).addClass('alert-validate')
-        $(thisAlert).append('<span class="btn-hide-validate">&#xf136</span>')
-        $('.btn-hide-validate').each(function(){
-            $(this).on('click',function(){
-               hideValidate(this)
-            })
-        })
+    else {
+      if($(input).val().trim() == ''){
+        return false
+      }
     }
-
-    function hideValidate(input) {
-        let thisAlert = $(input).parent()
-        $(thisAlert).removeClass('alert-validate')
-        $(thisAlert).find('.btn-hide-validate').remove()
-    }
+  }
+  
+  function showValidate(input) {
+    var thisAlert = $(input).parent()
+    $(thisAlert).addClass('alert-validate')
+    $(thisAlert).append('<span class="btn-hide-validate">&#xf136</span>')
+    $('.btn-hide-validate').each(function(){
+      $(this).on('click',function(){
+        hideValidate(this)
+      })
+    })
+  }
+  
+  function hideValidate(input) {
+    let thisAlert = $(input).parent()
+    $(thisAlert).removeClass('alert-validate')
+    $(thisAlert).find('.btn-hide-validate').remove()
+  }
 })(jQuery)

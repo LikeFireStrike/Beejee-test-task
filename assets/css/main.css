@@ -645,7 +645,7 @@ textarea.input {
   background: #cccccc !important;
 }
 
-#tasks-placeholder {
+#tasks-placeholder, #admin-error, .btn-logout, .btn-show-login {
   display: none;
 }
 

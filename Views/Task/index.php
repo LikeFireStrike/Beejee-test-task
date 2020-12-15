@@ -1,8 +1,10 @@
 <div class="wrap-task w-75 mx-auto text-right">
   <!-- Button trigger modal -->
-  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
+  <button type="button" class="btn btn-primary btn-show-login" data-toggle="modal" data-target="#loginModal">
     Sign in
   </button>
+  <!-- Logout button -->
+  <button type="button" class="btn btn-danger btn-logout">Logout</button>
 </div>
 <div class="wrap-task w-75 mx-auto">
     <form class="task-form validate-form" name="create-form" id="create-form" method="POST" action="{BASE_DIR}/?controller=task&action=create">
