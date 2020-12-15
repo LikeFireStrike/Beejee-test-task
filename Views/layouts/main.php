@@ -54,6 +54,52 @@
       </div>
     </div>
   </div>
+  <!-- Update Modal -->
+  <div class="modal fade w-75 mx-auto" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog mw-100" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="task-form-title update-form-title">
+              Update the task
+          </span>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="task-form validate-form" name="create-form" id="update-form" method="POST" action="./?controller=task&action=update">
+            <div class="wrap-input validate-input bg1" data-validate="Please Type Your Name">
+                <span class="label-input">Name *</span>
+                <input class="input" type="text" name="name" placeholder="Enter Your Name">
+            </div>
+            <div class="wrap-input validate-input bg1" data-validate = "Enter Your Email (e@a.x)">
+                <span class="label-input">Email *</span>
+                <input class="input" type="text" name="email" placeholder="Enter Your Email ">
+            </div>
+            <div class="wrap-input validate-input bg0 rs1-alert-validate" data-validate = "Please Type Your Message">
+                <span class="label-input">Message *</span>
+                <textarea class="input" name="content" placeholder="Your message here..."></textarea>
+            </div>
+            <div class="wrap-input validate-input bg1 text-center">
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-primary btn-radio">
+                  <input type="radio" name="status" id="status-progress" autocomplete="off"> In progress
+                </label>
+                <label class="btn btn-primary btn-radio">
+                  <input type="radio" name="status" id="status-done" autocomplete="off"> Done
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <div class="container-task-form-btn">
+            <button class="btn-success p-2 rounded" type="submit" form="update-form">Update</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Information Modal -->
   <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
