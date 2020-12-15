@@ -4,6 +4,7 @@ import Task from './task.js'
   $('.filter-select').select2({
     minimumResultsForSearch: -1
   })
+  
   // Set sorting parameters and their default values
   const urlParams = new URLSearchParams(window.location.search)  
   window.props = {}
@@ -35,6 +36,28 @@ import Task from './task.js'
         $('.btn-logout').hide()
       }
     })
+  }
+  
+  window.clickUpdate = (e)=>{
+      let element = $(e.target)
+      let task = element.parent().parent().parent().get(0).task
+      let form = $('#updateModal')
+      switch(task.props.status) {
+        case '0':
+          if ($('#status-progress').is(':checked') === false) {
+            $('#status-progress').prop('checked', true).parent().addClass('active')
+          }
+          break;
+        case '1':
+          if ($('#status-done').is(':checked') === false) {
+            $('#status-done').prop('checked', true).parent().addClass('active')
+          }
+          break;
+      }
+      form.find('input[name="name"]').val(task.props.name)
+      form.find('input[name="email"]').val(task.props.email)
+      form.find('textarea[name="email"]').val(task.props.email)
+      form.modal()
   }
   // Load the tasks for current sorting parameters
   Task.loadPage()
@@ -81,12 +104,12 @@ import Task from './task.js'
         try {
           response = JSON.parse(response)
           let errorLabel = $('#admin-error')
-          if(response['success'] == 1) {
-            if (errorLabel.is(":visible")){errorLabel.hide()}
+          if (response['success'] == 1) {
+            if (errorLabel.is(":visible")) {errorLabel.hide()}
             Task.loadPage()
             $('#loginModal').modal('hide').find('input').val('')
           } else {
-            if (!errorLabel.is(":visible")){$('#admin-error').show()}
+            if (!errorLabel.is(":visible")) {$('#admin-error').show()}
           }
         } catch(e) {
           $('#loginModal').modal('hide')
@@ -124,13 +147,20 @@ import Task from './task.js'
     let modal = $(this)
     modal.find('.modal-body').find('span').removeClass().html('')
   })
+  // Clean the update form after closing 
+  $('#updateModal').on('hide.bs.modal', function (e) {
+    let modal = $(this)
+    $('.btn-radio').prop('checked', false)
+    modal.find('.input').val('')
+    modal.find('.active').removeClass('active')
+  })
   /*==================================================================
   [ Validate ]*/
   function validateForm(form) {
     let input = form.find('.validate-input .input')
     let check = true
     for(var i=0; i<input.length; i++) {
-      if(validate(input[i]) == false){
+      if (validate(input[i]) == false) {
         showValidate(input[i])
         check=false
       }
@@ -138,21 +168,21 @@ import Task from './task.js'
     return check
   }
   
-  $('.validate-form .input').each(function(){
-    $(this).focus(function(){
+  $('.validate-form .input').each(function() {
+    $(this).focus(function() {
       hideValidate(this)
       $(this).parent().removeClass('true-validate')
     })
   })
   
   function validate (input) {
-    if($(input).attr('type') == 'email' || $(input).attr('name') == 'email') {
-      if($(input).val().trim().match(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
+    if ($(input).attr('type') == 'email' || $(input).attr('name') == 'email') {
+      if ($(input).val().trim().match(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
         return false
       }
     }
     else {
-      if($(input).val().trim() == ''){
+      if ($(input).val().trim() == '') {
         return false
       }
     }
@@ -162,8 +192,8 @@ import Task from './task.js'
     var thisAlert = $(input).parent()
     $(thisAlert).addClass('alert-validate')
     $(thisAlert).append('<span class="btn-hide-validate">&#xf136</span>')
-    $('.btn-hide-validate').each(function(){
-      $(this).on('click',function(){
+    $('.btn-hide-validate').each(function() {
+      $(this).on('click',function() {
         hideValidate(this)
       })
     })

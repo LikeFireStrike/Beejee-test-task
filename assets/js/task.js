@@ -1,34 +1,38 @@
 class Task {
   static template
+  
+  // Create a task item
   constructor(props) {
     if (Task.template !== undefined) {
-      console.log('Constructor');
-      this.fetchHTML(props)
+      this.props = props
+      this.fetchHTML()
     } else {
       alert('Error')
     }
   }
+  // Get a template
   static loadTemplate() {
     return $.get('?action=template')
   }
+  // Load current page
   static loadPage() {
     $.when(authCheck()).done(()=>{
       $('#tasks-container').find('.wrap-task').remove()
       $('.loader').show()
       $.when(Task.loadTemplate()).done((template)=>{
-        console.log('Load template');
         Task.template = template
         $.when(Task.createNavBar()).done(()=>{
-          console.log('After navbar creation.');
+          console.log('After navbar creation.')
           Task.setPageParam(props.page)
           Task.loadTasks()
         })
       })
     })
   }
+  // Create a pagination
   static createNavBar() {
     return $.get('?action=count').done((cnt)=>{
-      console.log('Start navbar creation page');
+      console.log('Start navbar creation page')
       let pager = $('#nav-bar').html('')
       cnt = objectToArray(JSON.parse(cnt))
       let countPages = Math.ceil(cnt[0]/3)
@@ -45,19 +49,18 @@ class Task {
         pager.prepend(node)
         countPages--
       }
-      
       $('.page-link').on('click', (e)=>{
         props.page = $(e.target).data('page')
         Task.loadPage()
       })
-      console.log('Nav bar created');
     })
   }
+  // Change the URL page parameter
   static setPageParam(number) {
     history.pushState({page: number}, '', '?page=' + number)
   }
+  // Load the tasks
   static loadTasks() {
-    console.log('Tasks will be loaded.');
     $.post('?action=list', props).done(
       function( response ) {
         response = JSON.parse(response)
@@ -75,33 +78,23 @@ class Task {
         }
       })
   }
-  fetchHTML({
-    'id': id,
-    'name': name,
-    'content': content,
-    'email': email,
-    'status': status,
-    'moderated': moderated
-  }) {
+  // Draw the task
+  fetchHTML() {
+    let id, name, content, email, status, moderated
+    ({ id, name, content, email, status, moderated } = this.props)
     status = parseInt(status) ? 'task is done.' : 'task in progress.'
     moderated = parseInt(moderated) ? 'Moderated by Admin.' : 'not moderated.'
-  //  $.when(authCheck()).done((response) => {
-    //  let isAdmin = parseInt(response)
-      console.log(isAdmin)
-      let edit = isAdmin ? '<button class="btn btn-info">Edit task</button>' : ''
-      let html = Task.template.replace('{name}', name).replace('{email}', email)
-      .replace('{content}', content).replace('{status}', status)
-      .replace('{id}', id).replace('{edit}', edit)
-      let item = htmlToElem(html)
-      console.log('Item ' + id + ' added!')
-      document.getElementById('tasks-container').append(item)
-  //  }).done(() => {
-      $('.loader').hide()
-  //  })
+    let edit = isAdmin ? '<button class="btn btn-info btn-edit">Edit task</button>' : ''
+    let html = Task.template.replace('{name}', name).replace('{email}', email)
+    .replace('{content}', content).replace('{status}', status)
+    .replace('{id}', id).replace('{edit}', edit)
+    let item = htmlToElem(html)
+    let res = $(item).appendTo('#tasks-container')
+    res.get(0).task = this // attach Task object to DOM element
+    let button = $(res).find('.btn-edit')
+    button.on('click', (e)=>{clickUpdate(e)})
+    $('.loader').hide()
   }
-  /*authCheck() {
-      return $.get('?controller=user&action=secure')
-  }*/
 }
 
-export default Task;
+export default Task

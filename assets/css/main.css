@@ -649,6 +649,14 @@ textarea.input {
   display: none;
 }
 
+.update-form-title {
+  padding-left: 20px;
+}
+
+.btn-radio.active {
+  background-color: black;
+}
+
 /*==================================================================
 [ rs NoUI ]*/
 .wrap-task-form-range {
