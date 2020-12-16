@@ -32,7 +32,7 @@ Class App
      * @return Array Return array of configuration options
      * @throws Exception
      */
-    private function readConfig() {
+    public function readConfig() {
         try {
             if (file_exists(self::CONFIG_PATH)) {
                 if (!($config = parse_ini_file(self::CONFIG_PATH))) {

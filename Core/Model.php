@@ -4,7 +4,7 @@ Class Model
     /**
     * @var App $app Pointer to App object
     */
-    private $app;
+    protected $app;
     
     /**
     * @var Int PER_PAGE Number of tasks to show on page
@@ -50,46 +50,34 @@ Class Model
         return $dbStmnt->fetch();
     }
     
-    public function selectPage($page = 1, $col = null, $direction = null)
+    /**
+     * Get record by id
+     */
+    public function getById($id)
     {
-        $direction = strtoupper($direction);
-        // Validate sorting attributes
-        try {
-                $this->white_list(
-                $col,
-                $this->safeSortAttrs,
-                "Invalid field name"
-            );
-                $this->white_list(
-                $direction,
-                self::DIRECTIONS,
-                "Invalid ORDER BY direction"
-            );
-        } catch (InvalidArgumentException $e) {
-            echo $e->getMessage();
-            die();
-        }
-
-        // Prepare the database query
         $dbStmnt = $this->db->prepare(
-            'SELECT * FROM '.$this->table.' ORDER BY '
-            .$col.' '.$direction.' LIMIT :limit OFFSET :offset'
+            'SELECT * FROM '.$this->table.' WHERE id=:id'
         );
-        $limit  = self::PER_PAGE;
-        $offset = $limit * ($page - 1);
-        $this->replacePlaceholders($dbStmnt, [
-            ':limit'  => $limit,
-            ':offset' => $offset
-        ]);
+        if (!is_null(intVal($id)))
+          $this->replacePlaceholders($dbStmnt, [':id'=>$id]);
+        else
+          throw new InvalidArgumentException("Invalid select parameters!");
         $dbStmnt->execute();
-        return $dbStmnt->fetchAll();
+        $record = $dbStmnt->fetchAll();
+        return $record[0];
     }
     
+    /**
+     * Bind values to prepared query
+     * @param PDOStatement &$dbStmnt
+     * @param Array $params
+     */
     protected function replacePlaceholders(&$dbStmnt, $params)
     {
         // Not need to reset array pointer, first usage in the scope
-        while (($value = current($params)) !== false) {
+        while (!is_null(key($params))) {
             $placeholder = key($params);
+            $value = current($params);
             if(is_int($value))
                 $option = PDO::PARAM_INT;
             elseif(is_bool($value))
@@ -103,13 +91,14 @@ Class Model
             $dbStmnt->bindValue($placeholder, $value, $option);
             next($params);
         }
+        return $dbStmnt;
     }
     /**
      * Check if value is in whitelist
      * @param Mixed $value
      * @param Array $allowed
      */
-    private function white_list(&$value, $allowed, $message)
+    protected function white_list(&$value, $allowed, $message)
     {
         if ($value === null) {
             $value = $allowed[0];

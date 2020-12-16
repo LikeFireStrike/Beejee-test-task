@@ -1,20 +1,30 @@
 <?php
 Class TaskController extends Controller
 {
+    /**
+     * Show tasks list
+     */
     public function indexAction()
     {
         $this->validateSort($this->clean_post_params);
         $page      = $this->clean_post_params['page'];
         $column    = $this->clean_post_params['column'];
         $direction = $this->clean_post_params['direction'];
-        $tasks     = $this->model->selectPage($page, $column, $direction);
+        //$tasks     = $this->model->selectPage($page, $column, $direction);
         $this->drawView('index');
     }
     
-    public function templateAction() {
+    /**
+     * Get task item template
+     */
+    public function templateAction()
+    {
       echo View::getTemplate([$this->curName, 'item']);
     }
     
+    /**
+     * Get sorted tasks list
+     */
     public function listAction()
     {
       $tasks = $this->model->selectPage(
@@ -55,6 +65,55 @@ Class TaskController extends Controller
             echo $e->getMessage();
             die();
         }
+    }
+    /**
+     * Update task
+     */
+    public function updateAction()
+    {
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        try {
+            $response = [];
+            if ($this->validate()) {
+                $id = $this->clean_post_params['id'];
+                $curRecord = $this->model->getById($id);
+                if ($curRecord) { // record exist
+                    $name    = $this->clean_post_params['name'];
+                    $email   = $this->clean_post_params['email'];
+                    $content = $this->clean_post_params['content'];
+                    $status  = $this->clean_post_params['status'];
+                    if (intVal($curRecord['moderated'])) { // Already moderated
+                        if (
+                            $name       != $curRecord['name']
+                            || $email   != $curRecord['email']
+                            || $content != $curRecord['content']
+                            || $status  != $curRecord['status'] 
+                          ) {
+                          $moderated = 1;
+                        }
+                    } else {
+                        // Same as $moderated = $curRecord['moderated']
+                        $moderated = 1;
+                    }
+                    $res = $this->model->updateById(
+                                                    $id,
+                                                    $name,
+                                                    $email,
+                                                    $content, 
+                                                    $status,
+                                                    $moderated
+                                                  );
+                    $response['success'] = $res ? 1 : 0; 
+                } else {
+                    $response = ['success' => 0, 'error' => 'Record not exist!'];
+                }
+                echo json_encode($response);
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            die();
+        }
+      }
     }
     
     /**
@@ -106,9 +165,8 @@ Class TaskController extends Controller
      */
     private function checkState()
     {
-        if (!empty($_POST['state']) && !is_null($_POST['state'])) {
-            var_dump('State error');
-            return in_array($_POST['state'], [0,1]);
+        if (!empty($_POST['status']) && !is_null($_POST['status'])) {
+            return in_array($_POST['status'], [0,1]);
         } else {
             return true;
         }

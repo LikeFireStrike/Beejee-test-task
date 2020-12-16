@@ -7,7 +7,6 @@ Class UserController extends Controller
     public function loginAction()
     {
         try {
-            $this->layout = 'user';
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (isset($_POST['login']) && isset($_POST['password'])) {
                     $login    = $this->clean_post_params['login'];

@@ -80,13 +80,13 @@
                 <span class="label-input">Message *</span>
                 <textarea class="input" name="content" placeholder="Your message here..."></textarea>
             </div>
-            <div class="wrap-input validate-input bg1 text-center">
+            <div class="w-100 text-center">
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-primary btn-radio">
-                  <input class="btn-radio" type="radio" name="status" id="status-progress" autocomplete="off"> In progress
+                  <input class="btn-radio" type="radio" name="status" id="status-progress" autocomplete="off" value="0"> In progress
                 </label>
                 <label class="btn btn-primary btn-radio">
-                  <input class="btn-radio" type="radio" name="status" id="status-done" autocomplete="off"> Done
+                  <input class="btn-radio" type="radio" name="status" id="status-done" autocomplete="off" value="1"> Done
                 </label>
               </div>
             </div>

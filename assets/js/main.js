@@ -9,6 +9,7 @@ import Task from './task.js'
   const urlParams = new URLSearchParams(window.location.search)  
   window.props = {}
   window.isAdmin = 0
+  window.editId = null
   props.page = parseInt(urlParams.get('page'))
   props.column = 'id'
   props.direction = 'DESC'
@@ -39,8 +40,8 @@ import Task from './task.js'
   }
   
   window.clickUpdate = (e)=>{
-      let element = $(e.target)
-      let task = element.parent().parent().parent().get(0).task
+      let el = $(e.target)
+      let task = el.parent().parent().parent().get(0).task
       let form = $('#updateModal')
       switch(task.props.status) {
         case '0':
@@ -56,13 +57,14 @@ import Task from './task.js'
       }
       form.find('input[name="name"]').val(task.props.name)
       form.find('input[name="email"]').val(task.props.email)
-      form.find('textarea[name="email"]').val(task.props.email)
+      form.find('textarea').val(task.props.content)
+      editId = task.props.id
       form.modal()
   }
   // Load the tasks for current sorting parameters
   Task.loadPage()
   
-  // Listen for creating the task form submission
+  // Listen for creating task form submission
   $('#create-form').on('submit', function(e) {
     e.preventDefault()
     if (validateForm($(this))) {
@@ -93,10 +95,42 @@ import Task from './task.js'
         })
     } 
   })
-
+  // Update the task
+  $('#update-form').on('submit',(e)=>{
+    e.preventDefault()
+    $.when(authCheck()).done(()=>{
+      let el = $(e.target) 
+      if (isAdmin) {
+        if (validateForm(el)) {
+          let data = el.serialize() + '&id=' + editId
+          $.post(el.attr('action'), data).done((response)=>{
+            try {
+              response = JSON.parse(response)
+              if (parseInt(response.success)) { // If OK
+                $('#updateModal').modal('hide')
+                showMessageModal('The task was successfully updated!', 'success') // Show success message
+                Task.loadPage()
+              }
+            }catch(e) {
+              $('#updateModal').modal('hide')
+              showMessageModal('The server response is not a valid JSON. </br> Reload the page please.', 'danger')
+              Task.loadPage()
+            }
+          })
+        }
+      } else {
+        // Reload the page if not Admin
+        Task.loadPage()
+        $('#updateModal').modal('hide')
+        showMessageModal('You are loged out! Please sign in again!', 'danger')
+      }
+    })
+    
+    
+  })
+  // Send login form
   $('#login-form').on('submit', function(e) {
     e.preventDefault()
-    console.log($(this).serialize())
     if (validateForm($(this))) {
       let data = $(this).serialize()
       $.post($(this).attr('action'), data) // Send data to backend
@@ -105,9 +139,9 @@ import Task from './task.js'
           response = JSON.parse(response)
           let errorLabel = $('#admin-error')
           if (response['success'] == 1) {
-            if (errorLabel.is(":visible")) {errorLabel.hide()}
+            if (errorLabel.is(":visible")) {errorLabel.hide()} // Hide error if necessary
             Task.loadPage()
-            $('#loginModal').modal('hide').find('input').val('')
+            $('#loginModal').modal('hide').find('input').val('') // Reset the form after modal closing
           } else {
             if (!errorLabel.is(":visible")) {$('#admin-error').show()}
           }
