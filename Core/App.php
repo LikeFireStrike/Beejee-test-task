@@ -20,12 +20,15 @@ Class App
      * @var String BASE_DIR Application home directory
      */
     const BASE_DIR = '/bj';
-     
+    /**
+     * Get database connection
+     */
     public function __construct()
     {
         $dbInstance       = Database::getInstance($this->readConfig());
         $this->connection = $dbInstance->connection;
     }
+    
     /**
      * Parse the ini file, cause exception on 
      * syntax or file not found error
