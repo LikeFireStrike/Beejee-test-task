@@ -20,6 +20,7 @@ Class App
      * @var String BASE_DIR Application home directory
      */
     const BASE_DIR = '/bj';
+        
     /**
      * Get database connection
      */
