@@ -1,2 +1,3 @@
 # Beejee
-No loop lambda strike
+The MVC implimentation with SPA funtionality
+![screenshot](https://raw.githubusercontent.com/LikeFireStrike/Beejee-test-task/master/Beejee-task.png)
