@@ -17,8 +17,11 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12 font-weight-bold text-warning text-right">
-            Status: {status}
+        <div class="col-12 font-weight-bold text-right">
+            {status}
+        </div>
+        <div class="col-12 font-weight-bold text-right">
+            {moderated}
         </div>
     </div>
 </div>

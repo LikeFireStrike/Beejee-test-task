@@ -55,14 +55,19 @@ import Task from './task.js'
           }
           break;
       }
-      form.find('input[name="name"]').val(task.props.name)
-      form.find('input[name="email"]').val(task.props.email)
-      form.find('textarea').val(task.props.content)
+      form.find('input[name="name"]').val(htmlDecode(task.props.name))
+      form.find('input[name="email"]').val(htmlDecode(task.props.email))
+      form.find('textarea').val(htmlDecode(task.props.content))
       editId = task.props.id
       form.modal()
   }
   // Load the tasks for current sorting parameters
   Task.loadPage()
+  
+  function htmlDecode(input) {
+    let doc = new DOMParser().parseFromString(input, "text/html");
+    return doc.documentElement.textContent;
+  }
   
   // Listen for creating task form submission
   $('#create-form').on('submit', function(e) {

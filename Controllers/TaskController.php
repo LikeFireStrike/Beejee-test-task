@@ -10,7 +10,6 @@ Class TaskController extends Controller
         $page      = $this->clean_post_params['page'];
         $column    = $this->clean_post_params['column'];
         $direction = $this->clean_post_params['direction'];
-        //$tasks     = $this->model->selectPage($page, $column, $direction);
         $this->drawView('index');
     }
     
@@ -72,47 +71,50 @@ Class TaskController extends Controller
     public function updateAction()
     {
       if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        try {
-            $response = [];
-            if ($this->validate()) {
-                $id = $this->clean_post_params['id'];
-                $curRecord = $this->model->getById($id);
-                if ($curRecord) { // record exist
-                    $name    = $this->clean_post_params['name'];
-                    $email   = $this->clean_post_params['email'];
-                    $content = $this->clean_post_params['content'];
-                    $status  = $this->clean_post_params['status'];
-                    if (intVal($curRecord['moderated'])) { // Already moderated
-                        if (
-                            $name       != $curRecord['name']
-                            || $email   != $curRecord['email']
-                            || $content != $curRecord['content']
-                            || $status  != $curRecord['status'] 
-                          ) {
-                          $moderated = 1;
-                        }
-                    } else {
-                        // Same as $moderated = $curRecord['moderated']
-                        $moderated = 1;
-                    }
-                    $res = $this->model->updateById(
-                                                    $id,
-                                                    $name,
-                                                    $email,
-                                                    $content, 
-                                                    $status,
-                                                    $moderated
-                                                  );
-                    $response['success'] = $res ? 1 : 0; 
-                } else {
-                    $response = ['success' => 0, 'error' => 'Record not exist!'];
-                }
-                echo json_encode($response);
-            }
-        } catch (Exception $e) {
-            echo $e->getMessage();
-            die();
-        }
+          if ($_SESSION['isAdmin'] == md5('role is '.md5('admin'))) {
+              try {
+                  $response = [];
+                  if ($this->validate()) {
+                      $id = $this->clean_post_params['id'];
+                      $curRecord = $this->model->getById($id);
+                      $moderated = 0;
+                      if ($curRecord) { // record exist
+                          $name    = $this->clean_post_params['name'];
+                          $email   = $this->clean_post_params['email'];
+                          $content = $this->clean_post_params['content'];
+                          $status  = $this->clean_post_params['status'];
+                          if (intVal($curRecord['moderated'])) { // Already moderated
+                              if (
+                                  $name       != $curRecord['name']
+                                  || $email   != $curRecord['email']
+                                  || $content != $curRecord['content']
+                                  || $status  != $curRecord['status'] 
+                                ) {
+                                $moderated = 1;
+                              }
+                          } else {
+                              // Same as $moderated = $curRecord['moderated']
+                              $moderated = 1;
+                          }
+                          $res = $this->model->updateById(
+                                                          $id,
+                                                          $name,
+                                                          $email,
+                                                          $content, 
+                                                          $status,
+                                                          $moderated
+                                                        );
+                          $response['success'] = $res ? 1 : 0; 
+                      } else {
+                          $response = ['success' => 0, 'error' => 'Record not exist!'];
+                      }
+                      echo json_encode($response);
+                  }
+              } catch (Exception $e) {
+                  echo $e->getMessage();
+                  die();
+              }
+          }
       }
     }
     

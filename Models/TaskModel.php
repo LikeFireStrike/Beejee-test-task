@@ -48,7 +48,7 @@ Class TaskModel extends Model
     {
       if (!is_null(intVal($id))) {
           $dbStmnt = $this->db->prepare(
-              "UPDATE ".$this->table." SET name=':name', email=':email', content=':content', status=':status', moderated=':moderated' WHERE id=':id'"
+              "UPDATE ".$this->table." SET name=:name, email=:email, content=:content, status=:status, moderated=:moderated WHERE id=:id"
           );      
           $this->replacePlaceholders($dbStmnt, [
               ':id'        => $id,
@@ -57,7 +57,7 @@ Class TaskModel extends Model
               ':content'   => $content,
               ':moderated' => $moderated,
               ':status'    => $status
-          ]);        
+          ]);     
           return $dbStmnt->execute();
       } else {
           throw new InvalidArgumentException("Invalid sorting parameters!"); 

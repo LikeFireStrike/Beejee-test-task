@@ -22,7 +22,6 @@ class Task {
       $.when(Task.loadTemplate()).done((template)=>{
         Task.template = template
         $.when(Task.createNavBar()).done(()=>{
-          console.log('After navbar creation.')
           Task.setPageParam(props.page)
           Task.loadTasks()
         })
@@ -32,7 +31,6 @@ class Task {
   // Create a pagination
   static createNavBar() {
     return $.get('?action=count').done((cnt)=>{
-      console.log('Start navbar creation page')
       let pager = $('#nav-bar').html('')
       cnt = objectToArray(JSON.parse(cnt))
       let countPages = Math.ceil(cnt[0]/3)
@@ -57,6 +55,7 @@ class Task {
   }
   // Change the URL page parameter
   static setPageParam(number) {
+    if(number == 0) {number=1}
     history.pushState({page: number}, '', '?page=' + number)
   }
   // Load the tasks
@@ -68,11 +67,9 @@ class Task {
         if (items.length) {
           $('#tasks-placeholder').hide()
           Object.values(items).map(function(item) {
-            console.log('Let\'s create tasks')
             let task = new Task(item)
           })
         } else {
-          console.log('Show placeholder')
           $('#tasks-placeholder').show()
           $('.loader').hide()
         }
@@ -82,12 +79,12 @@ class Task {
   fetchHTML() {
     let id, name, content, email, status, moderated
     ({ id, name, content, email, status, moderated } = this.props)
-    status = parseInt(status) ? 'task is done.' : 'task in progress.'
-    moderated = parseInt(moderated) ? 'Moderated by Admin.' : 'not moderated.'
+    status = parseInt(status) ? '<span class="text-success">Status: task is done.</span>' : '<span class="text-warning">Status: task in progress.</span>'
+    moderated = parseInt(moderated) ? '<span class="text-success">Moderated by Admin.</span>' : ''
     let edit = isAdmin ? '<button class="btn btn-info btn-edit">Edit task</button>' : ''
     let html = Task.template.replace('{name}', name).replace('{email}', email)
-    .replace('{content}', content).replace('{status}', status)
-    .replace('{id}', id).replace('{edit}', edit)
+    .replace('{content}', content).replace('{status}', status).replace('{id}', id)
+    .replace('{edit}', edit).replace('{moderated}', moderated)
     let item = htmlToElem(html)
     let res = $(item).appendTo('#tasks-container')
     res.get(0).task = this // attach Task object to DOM element
