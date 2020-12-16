@@ -31,6 +31,9 @@ Class Model
      */
     protected $table;
     
+    /**
+     * Set table name and database connection
+     */
     public function __construct($app, $table)
     {
         $this->app   = $app;
