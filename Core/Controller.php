@@ -35,6 +35,9 @@ abstract class Controller
     */
     protected $layout = 'main';
     
+    /**
+     * Set model and sanitize $_POST, $_GET parameters
+     */
     function __construct($app, $action)
     {
         $this->app         = $app; 
@@ -117,8 +120,9 @@ abstract class Controller
             return $lambdaBag['html'];
         }
      }
+    
      /**
-      * Create apath from path array
+      * Create a path from a path array
       */
      private function combinePath($file)
      {
