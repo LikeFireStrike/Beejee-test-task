@@ -5,6 +5,9 @@
  */
 class Router {
     
+    /**
+     * Set default controller and action
+     */
     public function init($app)
     {
         // Default controller is TaskController
