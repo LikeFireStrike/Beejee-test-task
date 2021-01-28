@@ -1,4 +1,4 @@
-# Beejee
+# Framework
 The MVC implimentation with SPA funtionality <br />
 There are links to important places: <br />
     1. [Autoloader class](https://github.com/LikeFireStrike/Beejee-test-task/blob/889584d4be210730a7b3781309673bf1bfe0e292/Core/Autoloader.php#L1) <br />
